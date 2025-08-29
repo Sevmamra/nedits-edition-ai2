@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nedits AI — Your Professional Growth Partner</title>
+    <meta name="description" content="Nedits AI is your official expert AI assistant for creative, tech, and marketing solutions. Get expert guidance for your projects.">
+
+    <!-- Stylesheets & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/favicon.png" type="image/png">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#8b5cf6">
+    <link rel="apple-touch-icon" href="images/logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo"></div>
+            <span class="brand-name">Nedits AI</span>
+        </div>
+        
+        <button class="new-chat-btn" id="new-chat-btn">
+            <i class="fa-solid fa-plus"></i>
+            <span>New Chat</span>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="chat-search" placeholder="Search conversations...">
+        </div>
+
+        <!-- Chat Filters/Tags -->
+        <div class="chat-filters" id="chat-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="business">Business</button>
+            <button class="filter-btn" data-filter="creative">Creative</button>
+            <button class="filter-btn" data-filter="technical">Technical</button>
+        </div>
+
+        <div class="chat-history" id="chat-history"></div>
+
+        <!-- Storage Status -->
+        <div class="storage-status" id="storage-status">
+            <div class="storage-bar">
+                <div class="storage-progress"></div>
+            </div>
+            <span class="storage-text">Storage: 25% used</span>
+        </div>
+
+        <!-- Custom Instructions Button -->
+        <button class="custom-instructions-btn" id="instructions-btn">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Custom Instructions</span>
+        </button>
+    </aside>
+
+    <!-- Main Chat Panel -->
+    <main class="chat-panel" id="chat-panel">
+        <header class="chat-header">
+            <button class="icon-btn" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
+            <div class="chat-info">
+                <h2 id="current-chat-title">New Conversation</h2>
+                <span class="message-count" id="message-count">0 messages</span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" id="share-btn" title="Share Chat"><i class="fa-solid fa-share-nodes"></i></button>
+                <button class="icon-btn" id="export-btn" title="Export Chat"><i class="fa-solid fa-download"></i></button>
+                <button class="icon-btn" id="voice-input-btn" title="Voice Input"><i class="fa-solid fa-microphone"></i></button>
+                <button class="icon-btn" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+                <button class="icon-btn" id="settings-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <div class="chat-container" id="chat-container">
+            <div class="message-list" id="message-list">
+                <div class="empty-state" id="empty-state">
+                    <div class="logo"></div>
+                    <h1>Welcome to Nedits AI! 👋</h1>
+                    <p>Your expert partner for creative, tech, and marketing solutions. What amazing idea are you looking to bring to life today?</p>
+                    <div class="prompt-suggestions" id="prompt-suggestions">
+                        <!-- Suggestions will be loaded from JSON -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stop Generation Button (Hidden by default) -->
+        <div class="stop-generation-container" id="stop-container" style="display: none;">
+            <button class="stop-generation-btn" id="stop-btn">
+                <i class="fa-solid fa-stop"></i>
+                Stop Generating
+            </button>
+        </div>
+
+        <div class="composer-container">
+            <div class="composer">
+                <button class="icon-btn" id="attach-btn" title="Attach File"><i class="fa-solid fa-paperclip"></i></button>
+                <textarea id="input" placeholder="Ask Nedits AI anything..." rows="1"></textarea>
+                <div class="composer-actions">
+                    <button class="icon-btn" id="audio-response-btn" title="Audio Response"><i class="fa-solid fa-volume-high"></i></button>
+                    <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+            <p class="composer-hint">Press Shift+Enter for new line. Enter to send.</p>
+        </div>
+    </main>
+</div>
+
+<!-- Custom Instructions Modal -->
+<div class="modal" id="instructions-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Custom Instructions</h2>
+            <button class="close-modal" id="close-instructions">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Set preferences for how Nedits AI should respond to you</p>
+            <textarea id="instructions-text" placeholder="Example: Always respond in Hindi, keep answers concise, focus on web development solutions..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancel-instructions">Cancel</button>
+            <button class="btn-primary" id="save-instructions">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal" id="export-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Export Conversation</h2>
+            <button class="close-modal" id="close-export">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Choose export format:</p>
+            <div class="export-options">
+                <button class="export-option" data-format="text">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>Text File</span>
+                </button>
+                <button class="export-option" data-format="pdf">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>PDF</span>
+                </button>
+                <button class="export-option" data-format="image">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Image</span>
+                </button>
+                <button class="export-option" data-format="html">
+                    <i class="fa-solid fa-code"></i>
+                    <span>HTML</span>
+                </button>
+                <button class="export-option" data-format="markdown">
+                    <i class="fa-brands fa-markdown"></i>
+                    <span>Markdown</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal" id="share-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Share Conversation</h2>
+            <button class="close-modal" id="close-share">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Share this conversation via link:</p>
+            <div class="share-link-container">
+                <input type="text" id="share-link" readonly>
+                <button class="btn-secondary" id="copy-link">Copy</button>
+            </div>
+            <div class="share-options">
+                <label>
+                    <input type="checkbox" id="read-only-toggle" checked>
+                    Read-only mode
+                </label>
+                <label>
+                    <input type="checkbox" id="expiry-toggle">
+                    Set expiration (7 days)
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancel-share">Cancel</button>
+            <button class="btn-primary" id="generate-link">Generate Link</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settings-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Settings</h2>
+            <button class="close-modal" id="close-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-section">
+                <h3>Appearance</h3>
+                <div class="setting-item">
+                    <label>Theme</label>
+                    <select id="theme-select">
+                        <option value="auto">Auto (System)</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Accent Color</label>
+                    <div class="color-picker">
+                        <button class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+                        <button class="color-option" data-color="#3b82f6" style="background: #3b82f6;"></button>
+                        <button class="color-option" data-color="#10b981" style="background: #10b981;"></button>
+                        <button class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></button>
+                        <button class="color-option" data-color="#ef4444" style="background: #ef4444;"></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Chat Settings</h3>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="enter-to-send" checked>
+                        Enter key sends message
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="auto-scroll" checked>
+                        Auto-scroll to new messages
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="message-timestamps">
+                        Show message timestamps
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Data & Privacy</h3>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="chat-backup">
+                        Enable chat backup
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="usage-analytics">
+                        Send usage analytics (helps improve)
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <button class="btn-secondary" id="clear-data-btn">Clear All Chat Data</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancel-settings">Cancel</button>
+            <button class="btn-primary" id="save-settings">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal" id="feedback-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Send Feedback</h2>
+            <button class="close-modal" id="close-feedback">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>We'd love to hear your thoughts about Nedits AI!</p>
+            <div class="feedback-type">
+                <label>
+                    <input type="radio" name="feedback-type" value="suggestion" checked>
+                    Suggestion
+                </label>
+                <label>
+                    <input type="radio" name="feedback-type" value="bug">
+                    Bug Report
+                </label>
+                <label>
+                    <input type="radio" name="feedback-type" value="praise">
+                    Praise
+                </label>
+            </div>
+            <textarea id="feedback-text" placeholder="What's on your mind?" rows="4"></textarea>
+            <div class="rating-container">
+                <span>Rate your experience:</span>
+                <div class="star-rating">
+                    <i class="fa-solid fa-star" data-rating="1"></i>
+                    <i class="fa-solid fa-star" data-rating="2"></i>
+                    <i class="fa-solid fa-star" data-rating="3"></i>
+                    <i class="fa-solid fa-star" data-rating="4"></i>
+                    <i class="fa-solid fa-star" data-rating="5"></i>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancel-feedback">Cancel</button>
+            <button class="btn-primary" id="submit-feedback">Submit Feedback</button>
+        </div>
+    </div>
+</div>
+
+<!-- Audio Player -->
+<div class="audio-player" id="audio-player" style="display: none;">
+    <audio id="response-audio" controls></audio>
+    <button class="icon-btn" id="close-audio">&times;</button>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/turndown@7.1.1/dist/turndown.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
